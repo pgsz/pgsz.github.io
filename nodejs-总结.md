@@ -462,5 +462,315 @@ server.listen(3000,()=>{
             * 3. 在router.js中: module.exports = app;
             * 4. 在index.js中使用路由中间件: app.use(require('./router.js))
 
-            
-    
+
+
+
+# 第三方模块mongoose的简单介绍
+
+### mongoose的官网: http://mongoosejs.com/
+    * mongoose是基于mongodb封装在异步环境工作的对象模型工具
+        * 异步环境: 提高性能
+        * 对象模型工具: 一中全新的ORM思维去操作数据库
+    * 安装: mongoose
+        * npm/cnpm install/i mongoose
+```javascript
+//1,导入mongoose
+const mongoose = require('mongoose');
+
+//2.连接数据库  test：要连接的数据库名字    如果在则连接 不在则创建
+mongoose.connect('mongodb://localhost:27017/test', {useNewUrlParser: true});
+
+//3.创建表（mysql：table  mongodb：集合collection  mongoose：模型Model）
+/* 第一个参数：表的名字  第二个参数：表中的数据结构 */
+const Cat = mongoose.model('Cat', { name: String,age:Number });
+
+//4.创建行（mysql：行row  mongodb:文档document  mongoose:Entyty实体）
+const kitty = new Cat({ name: '张三',age:18 });
+
+//操作数据库：增加数据到数据库
+kitty.save().then(() => console.log('meow'));
+```
+
+## 数据库结构介绍
+    * 数据库服务(mySql,mongodb: 一个数据库服务可以有很多个数据库)
+        * 数据库: CQManager (一个数据库下可以有很多张表)
+            * 表: cats(一个表中可以有很多个数据 mySql:表 table; mongodb: 集合 collections; mongoos: 模型 Model)
+                * 记录: (一个记录可以有很多个列, mySql: 记录; mongodb: 文档document; mongoose: 实体 Entity)
+                    * 数据:
+## mongoose使用介绍
+```javascript
+// 导入模板
+const mongoose = require('mongoose');
+
+//链接数据库 class就是数据库的名称
+mongoose.connect('mongodb://127.0.0.1:27017/class');
+
+// 创建Model
+/* 
+第一个参数：模型名称（table表名）
+第二个参数：模型中的数据结构(table表中数据结构)
+返回值：model对象，负责table的增删改查操作
+*/
+let classModel = mongoose.model('students',{name:String,age:Number})
+```
+
+## mongoose增删改查的的基本操作
+```javascript
+/***********          增加操作            ***********/
+/* 
+第一个参数：要插入的数据  
+    如果只插入一条数据：则传单个对象
+    如果要插入多条数据：则传数组
+第二参数：回调函数
+    * err: 如果为null，表示插入成功。 否则插入失败
+*/
+
+student.create([{name:'张三',age:18},{name:'李四',age:20}],(err)=>{
+    if(err){
+        console.log('插入失败' + err);
+    }else{
+        console.log('插入成功');   
+    };
+});
+
+/***********          删除操作            ***********/
+/*删除满足条件的第一个数据
+第一个参数：查询条件
+第二个参数：回调函数 err：错误信息 
+ */
+student.deleteOne({name:'张三'},(err)=>{
+    if(err){
+        console.log('删除失败');
+    }else{
+        console.log('删除成功');  
+    };
+});
+
+//删除满足条件所有数据
+student.deleteMany({name:'张三'},(err)=>{
+    if(err){
+        console.log('删除失败');
+    }else{
+        console.log('删除成功');  
+    };
+});
+
+/*******          修改数据               **********/
+/*修改满足条件第一条数据
+第一个参数：查询条件
+第二个参数：要修改的数据
+第三个参数：回调函数 
+ */
+student.updateOne({name:'李四'},{name:'王五',age:88},(err)=>{
+    if(err){
+        console.log('修改失败');
+    }else{
+        console.log('修改成功');
+    }
+});
+
+//修改满足条件所有数据
+student.updateMany({name:'李四'},{name:'王五',age:88},(err)=>{
+    if(err){
+        console.log('修改失败');
+    }else{
+        console.log('修改成功');
+    }
+});
+
+/*******          查询数据               **********/
+/*查询满足条件所有数据
+第一个参数：查询条件
+            如果省略,则返回所有数据
+第二个参数：查询回调  err：错误信息  res：查询结果 
+ */
+student.find({name:'王五'},(err,res)=>{
+    if(err){
+        console.log('查询失败');   
+    }else{
+        console.log(res);       
+    }
+});
+
+//只想查询满足条件第一个数据  student.findOne()
+//通过数据唯一ID来查询  findByIdAndDelete findByIdAndCreate findByIdAndUpdate findByIdAndFind
+student.findById('5c6aa1953753d11b9824b93c',(err,res)=>{
+    if(err){
+        console.log(err);
+    }else{
+        console.log(res);
+    }
+});
+```
+
+## 用crawler爬取网页数据
+    * 安装: npm/cnpm install/i crawler --save
+```javascript
+// 导入文件
+const Crawler = require('crawler');
+// 创建抓包对象:抓取数据
+var c = new Crawler({
+    maxConnections : 10,
+    // This will be called for each crawled page
+    // 抓取数据之后会进入这个回调函数
+    callback : function (error, res, done) {
+        if(error){
+            console.log(error);
+        }else{
+            // crawler会将抓取到的网页数据赋值给jQuery的$对象
+            var $ = res.$;
+            // $ is Cheerio by default
+            //a lean implementation of core jQuery designed specifically for the server
+            // 只需要使用jQuery语法解析网页即可
+            // 抓取整个网页结构
+            // console.log($("html").text());
+            console.log($('#hero_list tr').length)
+           $('#hero_list tr').each((index,ele)=>{ 
+            // 获取英雄名字
+            // console.log($(ele).find('td>.hero-icon>.class-icon>a').attr('title'))
+            let heroName = $(ele).find('td>.hero-icon>.class-icon>a').attr('title');
+            console.log(heroName);
+            // 获取英雄技能
+            // console.log($(ele).find('td>.joymewiki-tooltips>.joymewiki-tooltips-sub>.tt_skill>.havepassive>a').text())
+            let heroSkill = $(ele).find('td>.joymewiki-tooltips>.joymewiki-tooltips-sub>.tt_skill>.havepassive>a').text();
+            console.log(heroSkill)
+            // 获取英雄图标
+            // console.log($(ele).find('td>.hero-icon >a>img').attr('src'))
+            let heroIcon = $(ele).find('td>.hero-icon >a>img').attr('src');
+            console.log(heroIcon)
+           })
+        }
+        done();
+    }
+});
+// 开始抓包
+// Queue just one URL, with default callback
+c.queue('http://wiki.joyme.com/cq/%E5%89%91%E5%A3%AB');
+```
+
+## 用crawler爬取网页文件数据
+```javascript
+//导入原生文件模块
+var fs = require('fs');
+//1.导入模块
+const Crawler = require('Crawler');
+ 
+//2.创建抓包对象
+var c = new Crawler({
+    encoding:null,
+    jQuery:false,// set false to suppress warning message.
+    callback:function(err, res, done){
+        if(err){
+            console.error(err.stack);
+        }else{
+            //自动帮我们把抓取到的文件写入到服务器本地
+            fs.createWriteStream(res.options.filename).write(res.body);
+        }
+        
+        done();
+    }
+});
+ 
+//3.开始抓包
+c.queue({
+    uri:"http://p6.qhimg.com/dr/72__/t019d01918ef9f45d4e.png",
+    filename:"./resource/images/hero111.png"//本地文件路径
+});
+```
+
+## 用crawler同时爬取文本和文件
+```javascript
+//1.导入模块
+var Crawler = require("crawler");
+//导入M层
+const heroModel = require('./heroModel.js');
+//2.创建抓包对象:抓取数据
+var Datec = new Crawler({
+    maxConnections: 10,
+    // This will be called for each crawled page
+    //抓取到数据之后会进入这个回调函数
+    callback: function (error, res, done) {
+        if (error) {
+            console.log(error);
+        } else {
+            //crawler会将抓取到的网页数据赋值给jquery的$对象
+            var $ = res.$;
+            // $ is Cheerio by default
+            //a lean implementation of core jQuery designed specifically for the server
+            //只需要使用jquery语法解析网页即可
+            // console.log($("html").text());
+            //tbody有可能代码没写，浏览器自动生成，不要用tbody去解析页面
+            console.log($('#hero_list tr').length);
+            //使用jqeury语法解析页面，得到你想要抓取的数据
+            //思路：将抓取的数据存入数组中，然后使用mongoose添加到数据库
+            //1.声明空数组
+            let heroArr = [];
+            $('#hero_list tr').each((index, element) => {
+                //1.获取英雄名字
+                let heroName = $(element).find('td>.hero-icon .class-icon>a').attr('title');
+                console.log(heroName);
+                //2.获取英雄技能
+                let heroSkill = $(element).find('.mwiki-hide .tt_skill .name a').text();
+                console.log(heroSkill);
+                //3.获取英雄图标
+                let heroIcon = $(element).find('td>div>a>img').attr('src');
+                console.log(heroIcon);
+                //获取到图片路径之后，使用FileC抓取文件
+                //图片名字格式改为：  /resource/images/英雄名称.png
+                let imgPath = './resource/images/' + heroName + '.png'//拼接文件绝对路径
+                Filec.queue({
+                    uri: heroIcon,
+                    filename: imgPath //本地文件路径
+                });
+                //2.将英雄对象添加到数组中
+                heroArr.push({
+                    name:heroName,
+                    skill:heroSkill,
+                    icon:'/resource/images/' + heroName + '.png'//url路径
+                });
+            });
+            //3.将数组添加到数据库
+            //抓取到的第一个元素是表头，需要去掉
+            heroArr.shift();
+            console.log(heroArr);
+            heroModel.create(heroArr,(err)=>{
+                if(err){
+                    console.log('抓包入库失败');
+                }else{
+                    console.log('success');
+                }
+            });         
+        }
+        done();
+    }
+});
+//3.开始抓包
+// Queue just one URL, with default callback
+Datec.queue('http://wiki.joyme.com/cq/%E5%89%91%E5%A3%AB');
+//2.创建抓包对象:抓取文件
+const fs = require('fs');
+var Filec = new Crawler({
+    encoding: null,
+    jQuery: false, // set false to suppress warning message.
+    callback: function (err, res, done) {
+        if (err) {
+            console.error(err.stack);
+        } else {
+            //自动帮我们把抓取到的文件写入到服务器本地
+            fs.createWriteStream(res.options.filename).write(res.body);
+        }
+        done();
+    }
+});
+/****** M层：负责处理数据（增删改查）  *******/
+//1.导入模块
+const mongoose = require('mongoose');
+//2.连接数据库  CQManager:数据库名字
+mongoose.connect('mongodb://127.0.0.1/CQManager',{useNewUrlParser:true});
+//3.创建Model  heros：表的名字  第二个参数：表中存储的数据的结构
+let heroModel = mongoose.model('heros',{name:String,skill:String,icon:String});
+//4.导出M层:导出Model，因为mongoose中数据库增删改查由model负责
+module.exports = heroModel;
+```
+
+
