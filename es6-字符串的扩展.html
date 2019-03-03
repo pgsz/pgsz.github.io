@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        // 1: includes(), startsWith(), endsWITH()
+        /*  以往javascript只有 indexOf 方法,可以用来确定一个字符串是否包含在另一个字符串中
+                stringObj.indexOf(searchvalue,fromindex)
+                    searchvalue:必需,规定需检索的字符串值
+                    fromindex:可选,固定开始检索的位置,合法取值是0到stringObj.length-1;
+                                如果省略,则将从字符串的首字符开始检索
+                                对大小写敏感
+                                如果需要检索的值没有出现,则返回 -1;
+        */
+        /*   includes(): 返回布尔值,是否找到参数字符串
+             startsWith(): 返回布尔值,参数字符串是否在原字符串的头部
+             endsWith(): 返回布尔值,参数字符串是否在原字符串的尾部
+        */
+        // let obj = 'Hello world!';
+        // console.log(obj.startsWith('Hello')) // true
+        // console.log(obj.endsWith('!')) // true
+        // console.log(obj.includes('o')) // true
+        // // 第二个参数,开始搜索的位置
+        // console.log(obj.startsWith('world', 6)) // true
+        // console.log(obj.endsWith('Hello', 5) )// true
+        // console.log(obj.includes('Hello', 6)) // false
+
+
+
+        // 2. repeat()
+        /*  repeat方法返回一个心字符串,表示将原字符串重复n次
+                小数:  取整
+                负数或Infinity: 报错
+                0 - -1间 或 NAN: 等同于0
+                字符串: 先转化成数字
+        */
+        // console.log('x'.repeat(3))    // 'xxx'
+        // console.log('x'.repeat(0))    // ""
+
+
+        // 3. padStart()  padEnd()
+        /* 如果某个字符串不够指定长度,会在头部或尾部补全
+               padStart()  头部补全
+               padEnd()   尾部补全
+               第一个参数:  字符串补全生效的最大长度
+               第二个参数:  用来补全的字符串  (如果省略,默认用空格)
+        */
+        // console.log('x'.padStart(5,'ab'))   //ababx
+        // console.log('x'.padEnd(5,'ab'))   // xabab
+
+
+        //  模板字符串
+        /* 
+           用反引号（`）标识。它可以当作普通字符串使用，也可以用来定义多行字符串，或者在字符串中嵌入变量
+           模板字符串中嵌入变量，需要将变量名写在${}之中。
+        */
+        
+
+
+
+    </script>
+</body>
+
+</html>

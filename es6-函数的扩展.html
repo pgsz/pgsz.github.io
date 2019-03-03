@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        /*
+        （1）函数体内的this对象，就是定义时所在的对象，而不是使用时所在的对象。
+        （2）不可以当作构造函数，也就是说，不可以使用new命令，否则会抛出一个错误。
+        （3）不可以使用arguments对象，该对象在函数体内不存在。如果要用，可以用 rest 参数代替。
+        （4）不可以使用yield命令，因此箭头函数不能用作 Generator 函数。
+
+         第一点尤其值得注意。this对象的指向是可变的，但是在箭头函数中，它是固定的。
+         */
+
+
+        // function foo() {
+        //     setTimeout(() => {
+        //         console.log('id:', this.id);
+        //     }, 100);
+        // }
+        // var id = 21;
+        // foo.call({
+        //     id: 42
+        // });
+        // id: 42
+
+
+        // function Timer() {
+        //     this.s1 = 0;
+        //     this.s2 = 0;
+        //     // 箭头函数
+        //     setInterval(() => this.s1++, 1000);
+        //     // 普通函数
+        //     setInterval(function () {
+        //         this.s2++;
+        //     }, 1000);
+        // }
+        // var timer = new Timer();
+        // setTimeout(() => console.log('s1: ', timer.s1), 3100);
+        // setTimeout(() => console.log('s2: ', timer.s2), 3100);
+        // s1: 3
+        // s2: 0
+        /* Timer函数内部设置了两个定时器，分别使用了箭头函数和普通函数。前者的this绑定定义时所在的作用域（即Timer函数），后者的this指向运行时所在的作用域（即全局对象）。所以，3100 毫秒之后，timer.s1被更新了 3 次，而timer.s2一次都没更新。 */
+
+        // function foo() {
+        //     return () => {
+        //         return () => {
+        //             return () => {
+        //                 console.log('id:', this.id);
+        //             };
+        //         };
+        //     };
+        // }
+        // var f = foo.call({id: 1});
+        // var t1 = f.call({id: 2})()(); // id: 1
+        // var t2 = f().call({id: 3})(); // id: 1
+        // var t3 = f()().call({id: 4 }); // id: 1
+
+        // function foo() {
+        //     console.log(1);
+        //     return function foo1() {
+        //         console.log(2)
+        //         return function foo2() {
+        //             console.log(3)
+        //             return function foo3() {
+        //                 console.log(4)
+        //               }
+        //           }
+        //       }
+        //   }
+        //   foo()  // 1
+        //   foo()() // 1 2
+        //   foo()()() // 1 2 3
+        //   foo()()()() // 1 2 3 4
+         
+
+
+        /* 上面代码之中，只有一个this，就是函数foo的this，所以t1、t2、t3都输出同样的结果。因为所有的内层函数都是箭头函数，都没有自己的this，它们的this其实都是最外层foo函数的this。 */
+
+
+        // (function() {
+        // return [
+        //     (() => this.x).bind({ x: 'inner' })()
+        // ];
+        // }).call({ x: 'outer' });
+        // ['outer']
+        /* 由于箭头函数没有自己的this，所以当然也就不能用call()、apply()、bind()这些方法去改变this的指向。 */
+
+
+        /* 双冒号运算符 */
+        /* 函数绑定运算符是并排的两个冒号（::）
+                1. 双冒号左边是一个对象，右边是一个函数。该运算符会自动将左边的对象，作为上下文环境（即this对象），绑定到右边的函数上面。
+                2. 如果双冒号左边为空，右边是一个对象的方法，则等于将该方法绑定在该对象上面。 */
+    </script>
+</body>
+
+</html>

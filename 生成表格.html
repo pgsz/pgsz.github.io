@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            border: 1px solid #c0c0c0;
+        }
+
+        th,
+        td {
+            border: 1px solid #d0d0d0;
+            color: #404060;
+            padding: 10px;
+        }
+
+        th {
+            background-color: #09c;
+            font: bold 16px "微软雅黑";
+            color: #fff;
+        }
+
+        td {
+            font: 14px "微软雅黑";
+        }
+
+        tbody tr {
+            background-color: #f0f0f0;
+        }
+
+        tbody tr:hover {
+            cursor: pointer;
+            background-color: #fafafa;
+        }
+    </style>
+
+</head>
+
+<body>
+<input type="button" value="获取数据" id="j_btnGetData" />
+<table>
+    <thead>
+    <tr>
+        <th>标题</th>
+        <th>地址</th>
+        <th>说明</th>
+    </tr>
+    </thead>
+    <tbody id="j_tbData">
+
+    </tbody>
+</table>
+</body>
+
+</html>
+<script src="jquery-1.12.4.js"></script>
+<script>
+    $(function () {
+        //模拟从后台拿到的数据
+        //data数组的每一个元素其实就是一个tr.
+        var data = [{
+            name: "传智播客",
+            url: "http://www.itcast.cn",
+            type: "IT最强培训机构"
+        }, {
+            name: "黑马程序员",
+            url: "http://www.itheima.com",
+            type: "大学生IT培训机构"
+        }, {
+            name: "传智前端学院",
+            url: "http://web.itcast.cn",
+            type: "前端的黄埔军校"
+        }];
+
+
+        //需求:点击获取数据按钮,根据data这个数组里面的数据来给tbody追加tr.
+        //data这个数组,有多少个元素,就生成多少个tr, 每一个元素又是一个对象,所以对象有多少个键值对就有多少个td.
+
+        //获取按钮点击事件.
+        $('#j_btnGetData').click(function () {
+            //1.html();
+            // var list = [];
+            // for(var i = 0 ; i < data.length; i++){
+            // 	list.push('<tr>');
+            //   //遍历data数组的元素,也就是遍历对象,有多少个键值对,就生成多少个td.
+            //   for(var key in data[i]){
+            //     list.push('<td>');
+            //     list.push(data[i][key]); //
+            //     list.push('</td>');
+            //   }
+            // 	list.push('</tr>');
+            // }
+            // //把list数组里面的元素都拼接起来.
+            // var str = list.join('');
+            // //把拼接的这个抱含了很多个tr/td的字符串设置为tbody的内容.
+            // $('#j_tbData').html(str);
+
+
+
+            //2.1  $();
+            // for(var i = 0 ; i < data.length; i++){
+            // 	var $tr = $('<tr><td>'+data[i]["name"]+'</td><td>'+data[i]["url"]+'</td><td>'+data[i]["type"]+'</td></tr>');
+            //   $('tbody').append($tr);
+            // }
+
+
+            //2.2  $()
+//            for(var i = 0 ; i < data.length; i++){
+//                var list = [];
+//                list.push('<tr>');
+//                for(var key in data[i]){
+//                    list.push('<td>');
+//                    list.push(data[i][key]);
+//                    list.push('</td>');
+//                }
+//                list.push('</tr>');
+//
+//                //就是用上面这个list数组里面的东西拼接的字符串.生成一个tr元素.
+//                var $tr = $(list.join(""));
+//                console.log($tr);
+//                //把这个生成的$tr追加到tbody中
+//                $('#j_tbData').append($tr);
+//            }
+
+
+            for (var i = 0; i < data.length; i++){
+                var arr = [];
+                arr.push("<tr>");
+                for (var key in data[i]){
+                    arr.push("<td>");
+                    arr.push(data[i][key]);
+                    arr.push("</td>")
+                }
+                arr.push("</tr>");
+
+                var $arr = arr.join("");
+                console.log($arr);
+                $("#j_tbData").append($arr)
+            }
+
+        });
+
+
+
+
+//    var arr = ['张三','李四','王五'];
+//    var str = arr.join("");
+//    console.log(str);
+
+    })
+
+
+</script>

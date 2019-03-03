@@ -773,4 +773,158 @@ let heroModel = mongoose.model('heros',{name:String,skill:String,icon:String});
 module.exports = heroModel;
 ```
 
+# 实战项目
 
+##  基于 nodejs + express + MVC构架 + mongdb 开发服务端完整项目
+    * 需要导入的文件: jquery,bootstrap,art-template,mongoose,express
+        * crawler: 爬虫,抓取数据(文本和图片)
+        * body-parser: 解析body,req会有body的属性,就是解析好了post参数
+                * get 请求(不需要中间件) 直接req.query即可获取
+        * serve-favicon: 自动返回战点图标
+        * multer: 接收文件数据 (设置上传的文件夹和文件名)
+        * cookie-session: 保存会话状态
+        * svg-captcha: svg验证码 随机生成验证码
+    * 安装的两步:
+        * 1. cnpm init -y  初始化
+        * 2. cnpm i jquery bootstrap art-template mongoose express crawler body-parser serev-favicon multer cookie-session svg-captcha --save
+
+```javascript
+<!-- 英雄模块 -->
+// 导入express
+const express = require('express');
+// 创建服务器
+let app = express();
+/* 路由: 分发请求到C层 */
+// 导入C层
+const heroController = require('../controller/heroController.js')
+app.get('/',heroController.showHeroList) //重定向显示首页
+.get('/heroList',heroController.getHeroList) //获取首页英雄列表
+.get('/heroPage',heroController.getHeroPage) //分页数据查询
+.get('/heroSearch',heroController.getHeroSearch) //搜索英雄
+.post('/heroAdd',express.upload.single('icon'),heroController.doHeroAdd) //增加英雄
+.post('/heroUpdate',express.upload.single('icon'),heroController.doHeroUpdate) //修改英雄
+.get('/heroDelte',heroController.doHeroDelete) //删除英雄
+// 导出路由中间件
+module.exports = app;
+
+/* M层: 负责处理数据 (增删改查) 生成数据库 */ 
+// 导入模板
+const mongoose = require('mongoose');
+// 链接数据库   CQManager: 数据库名字
+mongoose.connect('mongodb://127.0.0.1/CQManager',{useNewUrlParser:true});
+// 创建Model  heros: 表的名字  第二个参数: 表中存储的数据结构
+let heroModel = mongoose.model('heros',{name:String,skill:String,icon:String})
+// 导出M层
+module.exports = heroModel;
+```
+
+## 重点
+    * 使用FileReader实现在线图片预览 + 图片尺寸  + 图片大小获取 
+    * 2.使用FormData提交文本+文件表单数据
+
+```javascript
+/* 1.使用FileReader实现在线图片预览 + 图片尺寸  + 图片大小获取 */
+//1.给表单input注册onchange
+$('#icon').on('change', function () {
+console.log(this.files[0]); //文件信息
+// 获取上传图片的真实大小
+// let size = this.files[0].size / 1024;
+//2.创建FileReader对象
+let fileReader = new FileReader();
+//3.开始读取:异步                                 
+fileReader.readAsDataURL(this.files[0]);
+//4.注册读取结束事件
+fileReader.onload = function () {
+    //得到base64编码的字符串（文件数据）
+    // console.log(fileReader.result);
+    //处理数据
+    //(1)在线预览
+    $('img').attr('src', fileReader.result);
+    //(2)获取上传图片的真实尺寸
+    // console.log($('img').width(),$('img').height());
+    //(3)获取文件大小
+    /*1.读取到的文件二进制被被进行base编码
+    2.base编码会将二进制变大  25% 
+    3.最终计算公式   kb =  base64长度/1024 * 0.75
+    */
+    // console.log(fileReader.result.length/1024*0.75 + 'kb');
+    //(4)获取完重要信息之后，图片变小展示
+    $('img').width('100px');
+    $('img').height('100px');
+}
+});
+
+/* 2.使用FormData提交带文件的表单数据 */
+$('#form').on('submit', function (e) {
+//（1）创建FormData对象 (参数是dom对象)
+var formData = new FormData($('#form')[0]);
+//禁用表单默认提交事件
+e.preventDefault();
+$.ajax({
+    url: '/heroAdd',
+    type: 'post',
+    dataType: 'json',
+    data: formData,
+    /* 默认情况下qjuery设置的请求头是application/x-www-form-urlencoded
+    而文件上传需要使用原生的form/data*/
+    contentType:false,
+    /* 这是jqeury独有的属性，默认情况下会将我们表单元素进行拼接（序列化） */
+    processData:false,
+    success: function (data) {
+        console.log(data);
+        if(data.err_code == 0){
+        //回到首页
+        location.href = '/';
+        }
+    }
+ });
+});
+```
+
+```javascript
+/* 用户模块 */
+// 导入express
+const express = require('express');
+// 创建路由器
+let app = express();
+/* 导出C层 */
+const userController = require('../controller/userController.js');
+app.get('/captcha',userController.getCaptcha)
+.post('/register',userController.register) //注册
+.post('/login',userController.login) // 登录
+.get('/logout',userController.loginout) // 注销
+// 导出路由中间件
+module.exports = app;
+
+/* M层: 负责处理数据 (增删改查) */ 
+// 导入模板
+const mongoose = require('mongoose');
+// 链接数据库   CQManager: 数据库名字
+mongoose.connect('mongodb://127.0.0.1/CQManager',{useNewUrlParser:true});
+// 创建Model  heros: 表的名字  第二个参数: 表中存储的数据结构
+let userModel = mongoose.model('user',{userName:String,passWord:String})
+// 导出M层
+module.exports = userModel;
+```
+
+## 重点
+    * 验证码功能: 服务端使用 svg-captcha 第三方模块实现
+    * 加密功能: 客户端使用 md5加密于加盐技术实现数据传输加密
+```javascript
+    <!-- 导入md5加密技术 -->
+    <script src="../md5.min.js"></script>
+    //将密码表单进行加密(客户端不获取明文，直接加密放入input中)
+    $('#passWord').val(md5($('#passWord').val(),'add yan'));
+```
+    * cookie-session: 服务端使用 cookie-session 第三方模块实现  
+```javascript
+// 将用户信息存入session
+req.session.user = docs[0]
+```
+
+
+# 前端学习的重点    
+    * 图片的预览和传输功能
+    * jquery 发送请求时的差异
+    * 跨页面传输的三种方式
+    * 加密技术的基本了解

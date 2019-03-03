@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        //1.解构赋值: 取出右边对象的属性值赋值给左边的变量
+        //声明了foo的变量,将右边对象的foo属性值赋值给变量foo
+
+        //如果右边对象有同名属性则赋值,没有则报错
+        // let {
+        //     foo
+        // } = {
+        //     foo: 'abc',
+        //     baz: 'bbc'
+        // };
+        // console.log(foo);  //abc
+
+
+        // let {
+        //     aaa
+        // } = {
+        //     foo: 'abc',
+        //     baz: 'bbc'
+        // };
+        // console.log(aaa); //undefine
+
+        // {foo:bbb} 左边foo是匹配模式(匹配右边对象对应的属性名)  bbb就是变量名 
+        // let {
+        //     foo: bbb
+        // } = {
+        //     foo: 'abc',
+        //     baz: 'bbc'
+        // };
+        // console.log(bbb)  //abc
+
+
+        /*
+          ES5 
+         */
+        //  var foo = {foo:'abc',baz:'bbc'}.foo;
+
+
+        // function f() {
+        //     console.log('aaa');
+        // }
+
+        // let [x = f()] = [1];
+
+        // console.log(x)
+        // console.log(f())
+
+
+
+        // let {
+        //     foo: bar
+        // } = {
+        //     foo: "aaa",
+        //     bar: "bbb"
+        // };
+        // console.log(bar) // "aaa"
+        // foo // error: foo is not defined
+
+
+
+        // var {x, y = 5} = {x: 1};
+        // console.log(x)   //1 
+        //console.log(y)   //5
+
+
+        //var {x: y = 3} = {};
+        // console.log(x)   //报错 x is not defined
+        //console.log(y)      //3
+
+        // {x;y = 3} 左边x是匹配模式(匹配右边对象对应的属性名)  y就是属性;
+        // var {x: y = 3} = {x: 5};
+        // console.log(x)   //报错    x is not defined
+        // console.log(y)      //5
+
+
+        // let obj = {
+        //     p: [
+        //         'Hello',
+        //         {
+        //             y: 'World'
+        //         }
+        //     ]
+        // };
+
+        // let {
+        //     p: [x, {
+        //         y
+        //     }]
+        // } = obj;
+        // console.log(x) // "Hello"
+        // console.log(y) // "World"
+
+
+
+        // const node = {
+        //     loc: {
+        //         start: {
+        //             line: 1,
+        //             column: 5
+        //         }
+        //     }
+        // };
+
+        // let {
+        //     loc,
+        //     loc: {
+        //         start
+        //     },
+        //     loc: {
+        //         start: {
+        //             line
+        //         }
+        //     }
+        // } = node;
+        // console.log(line) // 1
+        // console.log(loc) // Object {start: Object}
+        // console.log(start) // Object {line: 1, column: 5}
+
+
+        // 对字符串解构赋值  相当于:声明了一个 len 变量 ,再将字符串 'hello'的长度属性 赋值给len   length:是匹配模式
+        // let {
+        //     length: len
+        // } = 'hello';
+        // console.log(len) // 5
+
+
+        // 解构赋值的规则是，只要等号右边的值不是对象或数组，就先将其转为对象。由于undefined和null无法转为对象，所以对它们进行解构赋值，都会报错。
+        // let {
+        //     toString: s
+        // } = 123;
+        // console.log(s === Number.prototype.toString) // true
+
+        // let {
+        //     toString: h
+        // } = true;
+        // console.log(h === Boolean.prototype.toString) // true
+
+
+        // 用途
+        /*
+        交换变量的值
+        从函数返回多个值
+        函数参数的定义
+        提取 JSON 数据
+        函数参数的默认值
+        遍历 Map 结构
+        输入模块的指定方法
+        */
+        // let x = 1;
+        // let y = 2;
+        // [x, y] = [y, x];
+        // console.log(x + '和' + y) //2  1
+
+        // // 返回一个数组
+        // function example() {
+        //     return [1, 2, 3];
+        // }
+        // let [a, b, c] = example();
+
+        // // 参数是一组有次序的值
+        // function f([x, y, z]) {}
+        // f([1, 2, 3]);
+
+        // // 快速提取json对象的值
+        // let jsonData = {
+        //     id: 42,
+        //     status: "OK",
+        //     data: [867, 5309]
+        // };
+
+        // let {
+        //     id,
+        //     status,
+        //     data: number
+        // } = jsonData;
+        // console.log(id, status, number);
+        // // 42, "OK", [867, 5309]
+    </script>
+</body>
+
+</html>
