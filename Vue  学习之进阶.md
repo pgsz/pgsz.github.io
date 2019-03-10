@@ -16,7 +16,7 @@
 
 * 如果要引入路由相关信息,一定要引入 vue-router 插件
 
-*  <router-link>  组件的属性有： to， replace， append , tag , active-class , exact , event , exact-active-class,
+* <router-link>  组件的属性有： to， replace， append , tag , active-class , exact , event , exact-active-class,
 
   * to (必选参数)： 类型 string/location
 

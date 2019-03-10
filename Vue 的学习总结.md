@@ -371,7 +371,7 @@
 
 ##### axios (插件)
 
-* 安装: cnpm i axios     https://unpkg.com/axios/dist/axios.min.js
+* 安装: cnpm i axios --save    https://unpkg.com/axios/dist/axios.min.js
 * axios的github: https://github.com/axios/axios
 * 以Promise为基础的HTTP客户端，适用于：浏览器和node.js
 * 独立的axios库,封装ajax,用来发送请求,异步获取数据
@@ -649,50 +649,57 @@
 * 规则: 父组件中包含 router-view, 在路由规则中使用 children 配置
 
 * ```js
-     // 父组件：
-      const User = Vue.component('user', {
-        template: `
-          <div class="user">
-            <h2>User Center</h2>
-            <router-link to="/user/profile">个人资料</router-link>
-            <router-link to="/user/posts">岗位</router-link>
-            <!-- 子路由展示在此处 -->
-            <router-view></router-view>
-          </div>
-          `
-      })
-      // 子组件[简写]
-      const UserProfile = {
-        template: '<h3>个人资料：张三</h3>'
-      }
-      const UserPosts = {
-        template: '<h3>岗位：FE</h3>'
-      }  
-      // 路由
-      var router =new Router({
-        routers : [
-          { path: '/user', component: User,
-            // 子路由配置：
-            children: [
-              {
-                // 当 /user/profile 匹配成功，
-                // UserProfile 会被渲染在 User 的 <router-view> 中
-                path: 'profile',   // 注意:此处路径不需要带'/' 相当于 /user/profile 
-                component: UserProfile
-              },
-              {
-                // 当 /user/posts 匹配成功
-                // UserPosts 会被渲染在 User 的 <router-view> 中
-                path: 'posts',
-                component: UserPosts
-              }
-            ]
-          }
-        ]
-      })
+  // 父组件：
+   const User = Vue.component('user', {
+     template: `
+       <div class="user">
+         <h2>User Center</h2>
+         <router-link to="/user/profile">个人资料</router-link>
+         <router-link to="/user/posts">岗位</router-link>
+         <!-- 子路由展示在此处 -->
+         <router-view></router-view>
+       </div>
+       `
+   })
+   // 子组件[简写]
+   const UserProfile = {
+     template: '<h3>个人资料：张三</h3>'
+   }
+   const UserPosts = {
+     template: '<h3>岗位：FE</h3>'
+   }  
+   // 路由
+   var router =new Router({
+     routers : [
+       { path: '/user', component: User,
+         // 子路由配置：
+         children: [
+           {
+             // 当 /user/profile 匹配成功，
+             // UserProfile 会被渲染在 User 的 <router-view> 中
+             path: 'profile',   // 注意:此处路径不需要带'/' 相当于 /user/profile 
+             component: UserProfile
+           },
+           {
+             // 当 /user/posts 匹配成功
+             // UserPosts 会被渲染在 User 的 <router-view> 中
+             path: 'posts',
+             component: UserPosts
+           }
+         ]
+       }
+     ]
+   })
   ```
 
-  
+
+###### 编程式的导航
+
+* 除了使用 `<router-link>` 创建 a 标签来定义导航链接，我们还可以借助 router 的实例方法，通过编写代码来实现
+* 声明式: <router-like :to="...">     编程式: router.push(...)   router.replace(...)   router.go(...)
+  * 区别: 声明式是a标签,点击跳转  而编程式是代码跳转,结合逻辑进行跳转(进行逻辑判断. 如:登陆跳转)
+* router.push(location, onComplete?, onAbort?)
+  * 注意: 在Vue实例内部,可以通过 router 访问路由实例,可以调用 **this.​$router.push**
 
 
 
@@ -902,6 +909,9 @@
 
 ###### 具体使用:
 
-- 全部都是以  el- 开头
+- 全部都是以  el- 开头 
 - 购物车的添加数量 -- InputNumber 计数器
 - 主页的轮播图区域 -- Carousel 走马灯
+- 登陆页面 -- Form表单   (正则匹配 + 样式 + 表单验证)  +  消息提示  
+- 主页基本样式: Container 布局容器 + Layout 布局 
+-  window.sessionStorage.setItem/getItem/removeItem() 
