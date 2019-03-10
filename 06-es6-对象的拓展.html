@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <script>
+        //   1:属性的简洁表示法
+
+
+        // 2:属性名表示法
+        /* 一是直接用标识符作为属性名，方法二是用表达式作为属性名，这时要将表达式放在方括号之内。
+           注意: 属性名表达式与简洁语法不能同时使用,会报错
+         */
+
+        // let lastWord = 'last word';
+        // const a = {
+        //     'first word': 'hello',
+        //     [lastWord]: 'world'
+        // };
+        // console.log(a['first word']) // "hello"
+        // console.log(a[lastWord]) // "world"
+        // console.log(a['last word']) // "world"
+
+        // let obj = { // 表达式可以用于定义方法名
+        //     ['h' + 'ello']() {
+        //         return 'hi';
+        //     }
+        // };
+        // console.log(obj.hello()) // hi
+        //属性名表达式如果是一个对象，默认情况下会自动将对象转为字符串[object Object]，这一点要特别小心。
+        // const keyA = {
+        //     a: 1
+        // };
+        // const keyB = {
+        //     b: 2
+        // };
+        // const myObject = {
+        //     [keyA]: 'valueA',
+        //     [keyB]: 'valueB'
+        // };
+        // console.log(myObject) // Object {[object Object]: "valueB"}
+        // [keyA]和[keyB]得到的都是[object Object]，所以[keyB]会把[keyA]覆盖掉，而myObject最后只有一个[object Object]属性。
+
+
+        // 3.方法的 name 属性
+        // 函数的name属性，返回函数名。对象方法也是函数，因此也有name属性。
+        // let person = {
+        //     sayName() {
+        //         console.log('hello')
+        //     }
+        // }
+        // console.log(person.sayName.name) // sayName
+        /* 注意:两种特殊情况
+              1: bind方法创造的函数,name属性返回bound加上原函数的名字
+              2: Function构造函数创造的函数,name属性返回anonymous
+        */
+        // console.log((new Function()).name) // "anonymous"
+
+        // var doSomething = function () {
+        //     // ...
+        // };
+        // console.log(doSomething.bind().name) // "bound doSomething"
+
+        //如果对象的方法是一个 Symbol 值，那么name属性返回的是这个 Symbol 值的描述。
+    //     const key1 = Symbol('description');
+    //     const key2 = Symbol();
+    //     let obj = {
+    //         [key1]() {},
+    //         [key2]() {},
+    //     };
+    //    console.log( obj[key1].name) // "[description]"
+    //    console.log( obj[key2].name) // ""
+
+
+
+    </script>
+</body>
+
+</html>

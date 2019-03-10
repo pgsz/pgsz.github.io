@@ -24,7 +24,6 @@
         // };
         // console.log(foo);  //abc
 
-
         // let {
         //     aaa
         // } = {
@@ -147,6 +146,23 @@
         //     toString: h
         // } = true;
         // console.log(h === Boolean.prototype.toString) // true
+
+
+        function getA1({name='pg',age='25'} = {}) {
+            console.log(name,age)
+          }
+        function getA2({name,age} = {name:'pg',age:'25'}) {
+            console.log(name,age)
+          }
+          function getA3({name='pg',age='25'}) {
+            console.log(name,age)
+          }
+          getA1();   // pg 25
+          getA2();   // pg 25
+        //   getA3()    // 报错 Cannot destructure property `name` of 'undefined' or 'null'.
+          getA1({})  // pg 25
+          getA2({})  // undefined undefined
+          getA3({})  // pg 25
 
 
         // 用途

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        /* 一: 扩展运算符 (...)  将一个数组转为用逗号分隔的参数序列 */
+
+        /* 扩展运算符与正常的函数结合使用  扩展运算符后面可以放置表达式 */
+        // console.log(...[1, 2, 3, 4]) // 1 2 3 4
+        // console.log(1, ...[2, 3, 4], 5) // 1 2 3 4 5
+
+        // function f(v, w, x, y, z) {
+        //     console.log(v, w, x, y, z)
+        // }
+        // const args = [0, 1];
+        // f(-1, ...args, 2, ...[3]); // -1 0 1 2 3
+
+        /* 替代函数apply的方法:由于扩展运算符可以展开数组，所以不再需要apply方法，将数组转为函数的参数了 */
+        // ES5 的写法
+        // 利用apply传值的特点,可以传数组. 第一个参数为:改变this指向
+        // Math.max.apply(null, [14, 3, 77])
+        // // ES6 的写法
+        // Math.max(...[14, 3, 77])
+        // // 等同于
+        // Math.max(14, 3, 77);
+
+        // ES5的 写法
+        // var arr1 = [0, 1, 2];
+        // var arr2 = [3, 4, 5];
+        // console.log(Array.prototype.push.apply(arr1, arr2))   // 6  返回的是新数组的长度
+        // console.log(arr1)  // [0,1,2,3,4,5,6]
+        // // ES6 的写法
+        // let arr1 = [0, 1, 2];
+        // let arr2 = [3, 4, 5];
+        // console.log(arr1.push(...arr2))  // 6
+        // console.log(arr1)  // [0,1,2,3,4,5,6]
+
+        /* 复制数组  合并数组 */
+        /* concat()  1. 该方法不会改变原有的数组。参数可以是array，string，number，object。
+                     2. 返回一个新的数组，如果有数组作为参数传入concat（）方法里时，添加的是数组中的元素而不是数组本身。 */
+        // const a1 = [1, 2];
+        // // 复制数组,修改a2对a1没影响
+        // const a2 = a1.concat();
+        // console.log(a2) // 1 2
+        // a2[0] = 2;
+        // console.log(a2) // 1 2
+        // console.log(a1) // [1, 2]
+
+        // const a1 = [1, 2];
+        // // 写法一
+        // const a2 = [...a1];
+        // a2[0] = 2;
+        // console.log(a1)   // [1,2]
+        // console.log(a2)   // [2,2]
+        // // 写法二
+        // const [...a2] = a1;
+
+        // const a1 = [{
+        //     foo: 1
+        // }];
+        // const a2 = [{
+        //     bar: 2
+        // }];
+        // const a3 = a1.concat(a2);
+        // const a4 = [...a1, ...a2];
+        // console.log(a3)
+        // console.log(a4)
+        // console.log(a3[0] === a1[0]) // true
+        // console.log(a4[1] === a2[0]) // true
+        /* a3和a4是用两种不同方法合并而成的新数组，但是它们的成员都是对原数组成员的引用，这就是浅拷贝。如果修改了原数组的成员，会同步反映到新数组。 */
+
+        /* 与解构赋值结合,生成新的数组 */
+        // const [first, ...rest] = [1, 2, 3, 4, 5];
+        // console.log(first) // 1
+        // console.log(rest) // [2, 3, 4, 5]
+        // const [first, ...rest] = [];
+        // first // undefined
+        // rest // []
+        // const [first, ...rest] = ["foo"];
+        // first // "foo"
+        // rest // []
+        /* 扩展运算符用于数组赋值,只能放最后一位,否则报错 */
+        // const [...butLast, last] = [1, 2, 3, 4, 5];  //报错
+
+        /* 字符串:  将字符串转换为真正的数组 */
+        // console.log([...'hello']) // ["h", "e", "l", "l", "o"]
+
+
+        /* 二:  Array.from() */
+        /* Array.from方法将两类对象转换为真正的数组
+                    1. 类似数组的对象 (array-like object) 本质特征只有一点，即必须有length属性
+                    2. 可遍历(iterable)的对象
+         */
+        //     let arrayLike = {
+        //         '0': 'a',
+        //         '1': 'b',
+        //         '2': 'c',
+        //         length: 3
+        //     };
+        //     // es5
+        //     var arr1 = [].slice.call(arrayLike);
+        //     console.log(arr1) // ['a', 'b', 'c']
+        //     // es6
+        //     let arr2 = Array.from(arrayLike);
+        //     console.log(arr2) // ['a', 'b', 'c']
+
+        /* Array.from还可以接受第二个参数，作用类似于数组的map方法，用来对每个元素进行处理，将处理后的值放入返回的数组。 */
+        //    console.log( Array.from([1, 2, 3], (x) => x * x))  // [1, 4, 9]
+        //    console.log(Array.from([1, , 2, , 3], (n) => n || 0))  // [1, 0, 2, 0, 3]
+
+
+        /* 三: Array.of() */
+        /*  这个方法的主要目的，是弥补数组构造函数Array()的不足。因为参数个数的不同，会导致Array()的行为有差异。
+         Array.of方法用于将一组值，转换为数组;总是返回参数值组成的数组。如果没有参数，就返回一个空数组 */
+        // Array.of() // []
+        // Array.of(undefined) // [undefined]
+        // Array.of(1) // [1]
+        // Array.of(1, 2) // [1, 2]
+
+
+        /* 四: 数组实例的find()和findIndex() */
+        /* find()  用于找出第一个符合条件的数组成员。它的参数是一个回调函数，所有数组成员依次执行该回调函数，直到找出第一个返回值为true的成员，然后返回该成员。如果没有符合条件的成员，则返回undefined。
+        //            回调函数三个参数:  当前的值;当前的位置;原数组*/
+        // let arr1 = [1, 2, 5, 8, 10, 15].find(function (value, index, arr) {
+        //     return value > 5
+        // })
+        // console.log(arr1) //  8
+        /* findIndex() 返回第一个符合条件的数组成员的位置，如果所有成员都不符合条件，则返回-1。
+         */
+        //  let arr2 = [1, 2, 5, 8, 10, 15].findIndex(function (value, index, arr) {
+        //     return value > 5
+        // })
+        // console.log(arr2) //  3
+        // find函数接收了第二个参数person对象，回调函数中的this对象指向person对象。
+
+
+        /* 五: 数组实例的fill()  使用给定值，填充一个数组 */
+        // console.log(['a', 'b', 'c'].fill(7)) // [7, 7, 7]
+        // console.log(new Array(3).fill(7))  // [7, 7, 7]
+        // 第二个参数 指定填充的起始位置  第三个参数 结束位置(不包括)
+        // console.log(['a','b','c','d','e','f'].fill(7,2,5))  //["a", "b", 7, 7, 7, "f"]
+        // 注意，如果填充的类型为对象，那么被赋值的是同一个内存地址的对象，而不是深拷贝对象。
+
+
+        /* 六: 数组实例的entries() key() values() */
+        /* 用于遍历数组,返回一个遍历器对象,可以用for of循环遍历
+             keys()是对键名的遍历、values()是对键值的遍历，entries()是对键值对的遍历 
+             如果不使用for...of循环，可以手动调用遍历器对象的next方法，进行遍历 */
+
+
+        /* 七: 数组实例的includes() */
+        /* Array.prototype.includes方法返回一个布尔值，表示某个数组是否包含给定的值 */
+        //    console.log( [1, 2, 3].includes(2) )    // true
+        // 第二个参数: 搜索起始的位置
+        //    console.log([1, 2, 3, 4, 5].includes(3, 3))  // false)
+        /* 此前数组一直运用的indexOf 缺点:1.不够语义化  2.会对NaN的误判  因为内部使用的严格相等运算符 === */
+        //    console.log([NaN].indexOf(NaN));   // -1
+        //    console.log([NaN].includes(NaN));   // true
+
+
+        /* 八: 数组实例的flat(),flatMap() */
+        /* 数组的成员有时还是数组，Array.prototype.flat()用于将嵌套的数组“拉平”，变成一维的数组。该方法返回一个新数组，对原数据没有影响。 */
+        // console.log([1, 2, [3, 4]].flat())  // [1, 2, 3, 4]
+        // 默认只会'拉平'一层,多层嵌套参数可以写一个整数或者用Infinity作为参数  
+        // 如果原数组有空位，flat()方法会跳过空位
+        // console.log([1, 2, [3, [4, 5]]].flat(2)) // [1, 2, 3, 4, 5]
+        /* flatMap()方法对原数组的每个成员执行一个函数（相当于执行Array.prototype.map()），然后对返回值组成的数组执行flat()方法。该方法返回一个新数组，不改变原数组。 */
+        // 相当于 [[2, 4], [3, 6], [4, 8]].flat()
+        // console.log([2, 3, 4].flatMap((x) => [x, x * 2])) // [2, 4, 3, 6, 4, 8]
+
+        /* slice()该方法并不会修改数组，而是返回一个子数组。如果想删除数组中的一段元素，应该使用方法 Array.splice() */
+        //  let arr = [1,2,3,4]
+        //  let arr1 = arr.slice();
+        //  let arr2 = arr.concat()
+        //  console.log(arr1)
+        //  console.log(arr == arr1)  //
+        //  console.log(arr == arr2)  // 
+        //  console.log(arr1 == arr2)
+        //  console.log(arr.slice(1,3))  //[2,3]   //参数 从哪里开始到那里结束 
+        /* concat 该方法不会改变现有的数组，而仅仅会返回被连接数组的一个副本。*/
+        //  let arr3 = [1,2,3]
+        //  let arr4 = [4,5,6]
+        //  arr3.concat(arr4)
+        //  console.log(arr3.concat(arr4))   // [1,2,3,4,5,6]
+        //  console.log(arr3)  // [1,2,3]
+
+        /* 数组的空位 */
+        /* 数组的空位指，数组的某一个位置没有任何值,比如，Array构造函数返回的数组都是空位。 */
+        // console.log(Array(3)) // [, , ,]
+        /* 空位不是undefined,一个位置的值为undefined,依然是有值的 */
+        // console.log(0 in [undefined, undefined, undefined]) // true
+        // console.log(0 in [, , , ]) // false
+
+        /* ES5中对空位的处理
+        forEach(), filter(), reduce(), every() 和some()都会跳过空位。
+        map()会跳过空位，但会保留这个值
+        join()和toString()会将空位视为undefined，而undefined和null会被处理成空字符串。 */
+        /* ES6 则是明确将空位转为undefined。 */
+    </script>
+
+</body>
+
+</html>

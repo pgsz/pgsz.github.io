@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+<script>
+    // e:x和y都是复杂数据类型，比较地址
+    //  console.log ( [] ==  [] );//false
+    // [] 与右边逻辑非表达式结果比较
+    //(1) [] == !Boolean([])   (2) [] == !true  (3)[] == false  (4) [].toString() == false  (5)'' == false   (6)Number('0') == Number(false)
+    // console.log ( [] == ! [] );//true
+
+    // console.log ( {} ==  {} );//false
+    // {} 与右边逻辑非表达式结果比较
+    //(1){} == !{} (2){} == !true  (3){} == false  (4){}.toString() == false  (5)'[object Object]' == false  (6)Number('[object Object]') == false
+    // console.log ( {} == ! {} );//false
+
+
+    // var a = {
+    //     i:0,
+    //     valueOf:function (  ) {
+    //         a.i++;
+    //         return a.i;
+    //     }
+    // };
+    // if (a == 1 && a == 2 && a == 3){
+    //     console.log ( "a的值是多少，可以保证这行代码被执行" );
+    // }
+
+
+
+    //预解析面试题
+    //1
+    // if ( "a" in window ) {
+    //     var a = 10
+    // }
+    // alert ( a )
+
+    /*
+    var a;//声明全局变量a，所有的全局变量都是window的属性
+
+    if ( "a" in window ) {//window有a属性
+        a = 10
+    }
+    alert ( a )//10
+     */
+
+    //2.
+    // var a
+    // if ( !"a" in window ) {// false in window  :window有没有一个叫做false的属性
+    //     var a = 10
+    // }
+    // alert ( a );//undefined
+
+    //3.
+    // var a
+    // if ( name in window ) {// (1)window有一个默认属性叫做name，它的是空字符串   (2) ' in window'
+    //     var a = 10
+    // }
+    // alert ( a )//undefined
+
+    //4.
+    // if ( 'name' in window ) {//检查window有没有name属性
+    //     var a = 10
+    // }
+    // alert ( a )//10
+
+    //5.
+    // var num = 123;
+    // function f1(num) {
+    //     console.log(num); //
+    // }
+    // function f2() {
+    //     var num = 456;
+    //     f1(num);
+    // }
+    // f2();
+
+    /*
+    var num
+    function f1(num) {
+        console.log(num); //456
+    }
+    function f2() {
+        var num；
+        num = 456;
+        f1(num);//
+    }
+
+   num = 123;
+    f2();
+     */
+
+
+    //匿名递归函数求阶乘
+    // var res = (function(n){ return n ==1?1:n*arguments.callee(n-1)})(5);
+    // console.log ( res );
+
+
+
+
+
+    //变态面试题
+    //分析过程
+    //  var getName;
+    //
+    //  //函数声明语句声明的函数.
+    //  function getName(){
+    //    alert(5);
+    //  }
+    //
+    //  function Foo() {
+    //    getName = function(){
+    //      alert(1);
+    //    };
+    //    return this;
+    //  }
+    //
+    //  //把Foo作为一个对象,往这个对象中添加getName方法
+    //  Foo.getName = function() {
+    //    alert(2);
+    //  };
+    //
+    //  //给构造函数Foo的原型添加一个getName方法.Foo构造函数实例化的对象们可以访问这个getName
+    //  Foo.prototype.getName = function(){
+    //    alert(3);
+    //  };
+    //
+    //  //函数表达式声明的函数.
+    //  getName = function() {
+    //    alert(4);
+    //  };
+    //
+    //
+    //
+    //
+    //  Foo.getName(); // 2
+    //  getName(); // 4
+    //  Foo().getName(); // 1
+    //  getName(); // 1
+    //
+    //
+    //  new Foo.getName(); // 2
+    //
+    //  new Foo().getName(); // 3
+    //
+    //  new new Foo().getName(); // 3
+
+
+
+
+    //  function Student(){
+    //
+    //  }
+    //  //构造函数调用三部分,new 函数 小括号
+    //  new Student();
+
+    //---------------------------------------------------------------------------------
+    // function Foo() {
+    //     getName = function () {
+    //         alert(1);
+    //     };
+    //     return this;
+    // }
+
+    // Foo.getName = function () {
+    //     alert(2);
+    // };
+
+    // Foo.prototype.getName = function () {
+    //     alert(3);
+    // };
+
+    // var getName = function () {
+    //     alert(4);
+    // };
+
+    // function getName() {
+    //     alert(5);
+    // }
+
+
+    // Foo.getName(); // 2
+    // getName(); // 4
+    // Foo().getName(); // 1
+    // getName(); //1
+    // new Foo.getName(); // 2
+    // new Foo().getName(); // 3
+    // new new Foo().getName(); // 3
+
+    //具体解析 https://www.jianshu.com/p/ba862bc6489a
+
+
+
+    // var test = (function (a) {
+    //     this.a = a;
+    //     return function (b) {
+    //         return this.a + b;
+    //     }
+    // }(function (a, b) {
+    //     return a;
+    // }(1, 2)))
+
+    // console.log(test(4))  //5
+
+
+    // function show(num) {    
+    //         alert(num);   
+    //         if (num > 1) {
+    //             num--;
+    //             show(num);
+    //         }
+    //         alert(num)
+    //     }
+    //     show(3)  
+    /*  1: num = 3 3        2
+        2: num = 2   2   1
+        3: num = 1    1 1
+               3  2  1 1 1  2
+    */
+
+
+
+    // var a = 1, b = 1;
+    // function A(a) {
+    //     console.log(a)
+    //     console.log(b)
+    //     a = 2
+    //     b = 2
+    // }
+    // if (1) {
+    //     var b = 3
+    // }
+    // A()
+    // console.log(a)
+    // console.log(b)
+
+    
+</script>
