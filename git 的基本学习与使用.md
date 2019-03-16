@@ -36,7 +36,7 @@
 * git push -u origin master   -- 把本地代码提交到远程仓库主分支
 * git push -u origin 分支名   -- 把本地代码提交到指定分支
 * git reset --hard HEAD^   -- 回退到上一个版本
-* git reset -hard 版本号   -- 回退到指定版本
+* git reset --hard 版本号   -- 回退到指定版本
 * git reflog   -- 查看所有版本
 
 

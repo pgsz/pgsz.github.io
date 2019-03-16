@@ -372,12 +372,28 @@
 ##### axios (插件)
 
 * 安装: cnpm i axios --save    https://unpkg.com/axios/dist/axios.min.js
+
 * axios的github: https://github.com/axios/axios
+
 * 以Promise为基础的HTTP客户端，适用于：浏览器和node.js
+
 * 独立的axios库,封装ajax,用来发送请求,异步获取数据
 
   * axios结合vue使用想要考虑this的指向问题(箭头函数)
   * 一般会设置 Vue.prototype.$http = axios 用起来和 Vue-resource
+
+* ```js
+  axios.request(config)
+  axios.get(url[, config])
+  axios.delete(url[, config])
+  axios.head(url[, config])
+  axios.options(url[, config])
+  axios.post(url[, data[, config]])
+  axios.put(url[, data[, config]])
+  axios.patch(url[, data[, config]])
+  ```
+
+  
 
 
 ###### axios 与 vue-resource的区别
@@ -437,19 +453,96 @@
       keywords:${this.searchValue}
     }
   })
+  
+  async searchData() {
+      let res = await this.$http.get("users", {
+          // 请求头中提供 token 令牌
+          headers: {
+              Authorization: window.sessionStorage.getItem("token")
+          },
+         // 注意get中带请求参数的参数名与位置    (this.sendData 是个对象)
+          params: this.sendData
+      });
+      // console.log(res);
+      this.tableData = res.data.data.users;
+  },
   ```
 
 ###### Post请求
 
 * 不同环境中处理POST请求  https://github.com/axios/axios#using-applicationx-www-form-urlencoded-format
+
 * 默认情况下，axios 会将JS对象序列化为JSON对象.
+
+* ```js
+  axios.post(url[, data[, config]])
+  // this.addFormCont 注意post中带请求参数的位置  (this.addFormCont 是个对象)
+  this.$http.post("users", this.addFormCont, {   
+      headers: {
+          Authorization: window.sessionStorage.getItem("token")
+      }
+  });
+  ```
+
+  
+
+###### delete请求
+
+* ```js
+  this.$http.delete(`users/${it.id}`).then(this.searchData();
+  ```
+
+###### put请求
+
+* ```js
+  this.$http.put(`users/${it.id}/state/${it.mg_state}`)
+  ```
+
+  
 
 ###### 请求配置
 
 * axios.defaults.baseURL = 'http://111.230.232.110:8899/';
+
   * 设置一个'baseURL',便于为 axios 实例的方法传递相对URL
 
+  
 
+###### axios拦截器
+
+* 请求拦截器 (发送之前)
+
+  * 获取到请求的设置, 可以人为的更改其中的值, 例如:统一设置 token.
+
+  * ```js
+    // Add a request interceptor
+    axios.interceptors.request.use(function (config) {
+        // Do something before request is sent  请求正确
+        // config: 此次请求的各项设置  保存了请求的内容
+        return config;  
+      }, function (error) {
+        // Do something with request error  请求失败
+        return Promise.reject(error);
+      });
+    ```
+
+* 相应拦截器 (响应回来之后)
+
+  * 可以获取到服务器响应的内容, 例如:统一弹框.
+
+  * ```js
+    // Add a response interceptor
+    axios.interceptors.response.use(function (response) {
+        // Do something with response data  响应成功
+        // response  此次请求响应回的数据
+        return response;
+      }, function (error) {
+        // Do something with response error  响应失败
+        return Promise.reject(error);
+      });
+    ```
+
+    
 
 
 ##### 组件
@@ -521,6 +614,120 @@
     }
   })
   ```
+
+
+
+##### 组件的传值
+
+###### 父组件向子组件传递数据
+
+* 方式: 通过子组件 props 属性来传递数据; props是一个数组
+
+* 注意: 属性的值必须在组件中通过 props 属性显示指定; 否则,不会生效
+
+* 说明: 传递过来的 props 属性的用法与 data 属性的用法相同
+
+* 步骤: 
+
+  1. 子组件在 props 中创建一个属性,用以接收父组件传递过来的值
+  2. 父组件中注册子组件
+  3. 在子组件标签中添加子组件 props 中创建的属性
+  4. 把需要传给子组件的值赋值给该属性
+
+* ```html
+  <div id="app">
+    <!-- 如果需要往子组件总传递父组件data中的数据 需要加v-bind="数据名称" -->
+    <hello v-bind:msg="info"></hello>
+    <!-- 如果传递的是字面量 那么直接写-->
+    <hello my-msg="abc"></hello>
+  </div>
+  <!-- js -->
+  <script>
+    new Vue({
+      el: "#app",
+      data : {
+        info : 15
+      },
+      components: {
+        hello: {
+          // 创建props及其传递过来的属性
+          props: ['msg', 'myMsg'],
+          template: '<h1>这是 hello 组件，这是消息：{{msg}} --- {{myMsg}}</h1>'
+        }
+      }
+    })
+  </script>
+  ```
+
+###### 子组件向父组件传递数据
+
+* 方式: 父组件给子组件传递一个函数,由子组件调用这个函数
+
+* 说明: 借助 vue 中的自定义事件 (v-on:cunstomFn = 'fn')
+
+* 步骤: 
+
+  1. 在父组件中定义方法 parentFn
+  2. 在子组件组件引入标签中绑定自定义事件 v-on:自定义事件名='父组件中的方法'  ==> @pfn='parentFn'
+  3. 子组件通过 **$emit()** 触发自定义事件 this.$emit(pfn,参数列表...)
+
+* ```html
+  <hello @pfn="parentFn"></hello>
+  <script>
+    Vue.component('hello', {
+      template: '<button @click="fn">按钮</button>',
+      methods: {
+        // 子组件：通过$emit调用
+        fn() {
+          this.$emit('pfn', '这是子组件传递给父组件的数据')
+        }
+      }
+    })
+    new Vue({
+      methods: {
+        // 父组件：提供方法
+        parentFn(data) {
+          console.log('父组件：', data)
+        }
+      }
+    })
+  </script>
+  ```
+
+###### 不同组件之间的传值  Vuex
+
+###### 获取组件(或元素) - refs
+
+* 说明: vm.$refs 一个对象,持有已注册过 ref 的所有子组件(或HTML元素)
+
+* 使用: 在HTML元素中,添加 ref 属性,然后在JS中通过 vm.$refs.属性名 来获取
+
+* 注意: 如果获取的是一个子组件,那么通过ref就能获取到子组件中的 data 和 methods
+
+* ```html
+  <div id="app">
+    <div ref="dv"></div>
+    <my res="my"></my>
+  </div>
+  
+  <!-- js -->
+  <script>
+    new Vue({
+      el : "#app",
+      mounted() {
+        this.$refs.dv //获取到元素
+        this.$refs.my //获取到组件
+      },
+      components : {
+        my : {
+          template: `<a>sss</a>`
+        }
+      }
+    })
+  </script>
+  ```
+
+  
 
 
 
@@ -811,8 +1018,46 @@
 ###### 钩子函数 - created()
 
 * 说明: 在实例创建完成后被立即调用。在这一步，实例已完成以下的配置：数据观测 (data observer)，属性和方法的运算，watch/event 事件回调。然而，挂载阶段还没开始，`$el` 属性目前不可见
-* 注意: 这是一个常用的生命周期钩子函数,可以改变 data 中的数据, 调用methods 中的方法,并且修改可以通过vue都响应式绑定体现在页面上,获取computed中的计算属性等等
+* 
+* 算属性等等
 * 使用场景: 对实例进行预处理. 发送请求, 获取数据,但这个周期函数中没有方法来对实例化过程进行拦截, 如果某些数据必须获取才允许进入页面的话,建议在组件路由钩子beforeRouteEnter中来完成
+
+###### 钩子函数 - beforeMounted()
+
+* 说明:在挂载之前被调用: 相关的 render 函数首次被调用
+* 注意: 无法获取到 el 中的 DOM 元素,不能进行DOM 操作
+
+###### 钩子函数 - mounted()
+
+* 说明: vue 实例已经挂载到页面中,可以获取 DOM 元素, 进行 DOM 操作
+* 注意: 
+  * 在这个周期内,对data的改变可以生效. 但要进行下一轮的dom更新,dom上的数据才会更新
+  * beforeRouteEnter 的next钩子比 mounted 触发要靠后
+  * 指令的生效在 mounted 周期之前
+
+```text
+beforecreated：el 和 data 并未初始化 
+created:完成了 data 数据的初始化，el没有
+beforeMount：完成了 el 和 data 初始化  但无法获取DOM元素
+mounted ：完成挂载  可以获取DOM元素,进行DOM操作
+```
+
+###### 钩子函数 - beforeUpdate()
+
+* 数据更新时调用,发生在虚拟 DOM 重新渲染和打补丁之前. 可以在这个钩子函数中进一步地更改状态,这不会触发附加地重渲染过程.
+
+###### 钩子函数 - updated()
+
+* 由于数据更改导致的虚拟 DOM 重新渲染和打补丁，在这之后会调用该钩子。当这个钩子被调用时，组件 DOM 已经更新，所以现在可以执行依赖于 DOM 的操作。然而在大多数情况下，你应该避免在此期间更改状态，因为这可能会导致更新无限循环。
+
+###### 钩子函数 - beforeDestroy()
+
+* 说明: 实例销毁之前调用,还可以用 this 来获取实例
+* 使用场景: 实例销毁之前,执行清理任务.  比如: 清除组件中的定时器和监听的dom事件
+
+###### 钩子函数 - destroyed()
+
+* 说明: Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁
 
 
 
@@ -878,40 +1123,4 @@
     }
     ```
 
-
-
-##### 饿了吗UI  (基于vue)
-
-* 安装: cnpm i element-ui -S
-
-  * ```html
-    <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <!-- 引入组件库 -->
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-    ```
-
-* 完整引入
-
-  * ```js
-    import Vue from 'vue';
-    import ElementUI from 'element-ui';   // 导入饿了吗ui
-    import 'element-ui/lib/theme-chalk/index.css';  //样式文件想要单独引入
-    import App from './App.vue';
-    
-    Vue.use(ElementUI);   // use一下,才能使用
-    
-    new Vue({   // 实例化顶级对象
-      el: '#app',
-      render: h => h(App)
-    });
-    ```
-
-###### 具体使用:
-
-- 全部都是以  el- 开头 
-- 购物车的添加数量 -- InputNumber 计数器
-- 主页的轮播图区域 -- Carousel 走马灯
-- 登陆页面 -- Form表单   (正则匹配 + 样式 + 表单验证)  +  消息提示  
-- 主页基本样式: Container 布局容器 + Layout 布局 
--  window.sessionStorage.setItem/getItem/removeItem() 
+###### 

@@ -123,3 +123,157 @@
 
 ------
 
+##### 导航守卫
+
+* '导航' 表示路由正在发生改变
+* vue-router 提供的导航守卫主要用来通过跳转或取消的方式守卫导航. 有多种机会植入路由导航过程中:  全局的, 单个路由独享的, 或者组件级的.
+* 注意: 参数查询的改变并不会触发进入/离开的导航守卫. 此时可以通过观察 $router 对象来应对这些变化, 或者使用 beforeRouterUpdate 的组件内守卫.
+* 应用场景: 帮我们解决一些在组件加载之前,可以做一些操作,尤其是异步操作. 这样可以避免组件加载完毕后,却没有数据的尴尬. 当然,不应该在组件加载之前做太多的异步操作,会导致页面白屏时间过长,用户体验很差.,慎用. 
+  * 登录拦截: 没有登录信息,无法访问其他页面,跳转到登录页
+* 守卫队列
+  * 守卫两大种类: 前置守卫,  后置守卫
+  * 前置守卫: 
+    * 全局的前置守卫: beforeEach   beforeResolve
+    * 路由独享的守卫: beforeEnter
+    * 组件内的守卫: beforeRouteEnter   beforeRouteUpdate   beforeRouteLeave
+  * 后置守卫
+    * 全局的后置守卫: afterEach
+
+###### 全局前置守卫
+
+* 可以使用 router.beforeEach 注册一个或多个全局前置守卫
+
+* 当一个导航触发时，全局前置守卫按照创建顺序调用。守卫是异步解析执行，此时导航在所有守卫 resolve 完之前一直处于 **等待中**. (所有不宜有太多的异步加载)
+
+* ```js
+  const router = new VueRouter({ ... })
+  router.beforeEach((to, from, next) => {
+      // to: 即将进入的路由对象   from 即将离开的路由对象
+      if(to.path == '/login'){  
+          next()    // 前往登录页
+      } else {   // 不是登录页
+          if(window.sessionStorage.getItem('tokenNight')){
+              next()    // 有 tokenNight 则可以进入
+          } else {
+              next('/login')  // 否则前往登录页进行登录
+          }
+      }
+    })
+  ```
+
+* 每个守卫方法有三个参数
+
+  * to:  Route  :即将要进入的目标路由对象
+  * from: Route: 当前当行正要离开的路由
+  * next: Function:  一定要调用该方法来 resolve 这个钩子。执行效果依赖 next 方法的调用参数。
+    * next(): 进行管道中的下一个钩子。如果全部钩子执行完了，则导航的状态就是 confirmed (确认的).
+    * next(false): 中断当前的导航。如果浏览器的 URL 改变了 (可能是用户手动或者浏览器后退按钮)，那么 URL 地址会重置到 from 路由对应的地址。
+    * next('/') 或者 next({ path: '/' }): 跳转到一个不同的地址。当前的导航被中断，然后进行一个新的导航。你可以向 next 传递任意位置对象，且允许设置诸如 replace: true、name: 'home' 之类的选项以及任何用在 router-link 的 to prop 或 router.push 中的选项.
+    * next(error): (2.4.0+) 如果传入 next 的参数是一个 Error 实例，则导航会被终止且该错误会被传递给 router.onError() 注册过的回调
+    * 要确保调用 next 方法,否则钩子就不会被 resolved
+
+###### 全局解析守卫
+
+* 可以用 router.beforeResolve 注册全局守卫, 与 router.beforeEach 类似. 区别在于:  在导航被确认前, 同时在所有组件内守卫和异步路由组件被解析之后, 才被调用
+
+###### 组件内的守卫
+
+```js
+const Foo = {
+  template: `...`,
+  beforeRouteEnter (to, from, next) {
+    // 在渲染该组件的对应路由被 confirm 前调用
+    // 不！能！获取组件实例 `this`
+    // 因为当守卫执行前，组件实例还没被创建
+    // 支持给 next 传递回调的唯一守卫. 其他两个 this 已经可用,所有不支持传递回调,因为没必要了.
+  },
+  beforeRouteUpdate (to, from, next) {
+    // 在当前路由改变，但是该组件被复用时调用
+    // 举例来说，对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
+    // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
+    // 可以访问组件实例 `this`
+  },
+  beforeRouteLeave (to, from, next) {
+    // 导航离开该组件的对应路由时调用
+    // 可以访问组件实例 `this`
+    // 通常用来禁止用户在还未保存修改前突然离开
+    //  导航离开该组件的对应路由时调用，我们用它来禁止用户离开，比如还未保存草稿，或者在用户离开前，将setInterval销毁，防止离开之后，定时器还在调用。
+      const answer = window.confirm('Do you really want to leave? you have unsaved changes!')
+      if (answer) {
+          next()
+      } else {
+          next(false)  // 可以通过 next(false)取消
+      }
+   }
+}
+```
+
+###### 全局后置钩子
+
+* 和前置守卫不同:  不会接受 next 函数,也不会改变导航本身
+
+* ```js
+  router.afterEach((to, from) => {
+    // ...
+  })
+  ```
+
+###### 完整的导航解析流程
+
+* ```text
+  // 官网
+  1: 导航被触发。
+  2: 在失活的组件里调用离开守卫。
+  3: 调用全局的 beforeEach 守卫。
+  4: 在重用的组件里调用 beforeRouteUpdate 守卫 (2.2+)。
+  5: 在路由配置里调用 beforeEnter。
+  6: 解析异步路由组件。
+  7: 在被激活的组件里调用 beforeRouteEnter。
+  8: 调用全局的 beforeResolve 守卫 (2.5+)。
+  9: 导航被确认。
+  10:调用全局的 afterEach 钩子。
+  11:触发 DOM 更新。
+  12:用创建好的实例调用 beforeRouteEnter 守卫中传给 next 的回调函数。
+  ```
+
+* 导航守卫的执行顺序:  beforeRouteLeave < beforeEach < beforeRouteUpdate < beforeEnter < beforeRoureEnter < beforeResolve < afterEach
+
+###### 解惑
+
+* https://baijiahao.baidu.com/s?id=1612908077665784077&wfr=spider&for=pc
+
+* 导航守卫中 next 的用处:  使导航守卫队列继续往下迭代.
+* 为什么 afterEach 守卫没有 next: afterEach根本不在导航守卫队列内,
+
+ 没有迭代的 next.
+
+* beforeEach 是否可以叠加:  beforeEach 是可以叠加的, 所有的全局前置守卫按顺序存放在 beforeHooks 的数组里面
+* 路由的跳转经历了哪几部分:  路由跳转的核心方法是 transitionTo, 在跳转过程中经历了一次 confirmTransition.
+
+------
+
+##### 触发钩子的完整顺序
+
+* https://juejin.im/post/5b41bdef6fb9a04fe63765f1
+
+* 将路由导航, keep-alive, 和组件生命周期钩子结合起来,触发顺序. 假设是从a组件离开,第一次进入b组件
+  1.  beforeRouteLeave: 路由组件的组件离开路由前钩子,可取消路由离开
+  2.  beforeEach: 路由全局前置守卫,可用于登陆验证,全局路由loading等
+  3.  beforeEnter: 路由独享守卫
+  4.  beforeRouteEnter: 路由组件的组件进入路由前的钩子
+  5.  beforeResolve: 路由全局解析守卫
+  6.  afterEach: 路由全局后置钩子
+  7.  beforeCreate: 组件生命周期,不能访问this
+  8.  created: 组件生命周期,可以访问this,不能访问dom
+  9.  beforeMount: 组件生命周期
+  10.  deactivated: 离开缓存组件a,或者触发a的 beforeDestroy 和 destroyed组件销毁钩子
+  11.  mounted: 访问/操作dom
+  12. activated: 进入缓存组件,进入a的嵌套子组件(如果有的话)
+  13.  执行 beforeRouteEnter 回调函数next.
+
+
+
+
+
+
+
