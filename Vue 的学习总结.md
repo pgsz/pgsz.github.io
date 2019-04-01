@@ -33,9 +33,9 @@
 
   * 核心点:  谁起到主导作用
 
-    * 框架控制整个流程的是框架
+    * 框架控制整个流程的是框架 (操作的是数据)
 
-    * 使用库,由开发人员决定如何调用库中提供的方法
+    * 使用库,由开发人员决定如何调用库中提供的方法 (操作的是DOM)
 
       
 
@@ -440,7 +440,7 @@
 
 * ```js
   // url中带有query参数
-  axios.get('https://autumnfish.cn/search?keywords=${this.searchValue}')
+  axios.get('https://locally.uieee.com/search?keywords=${this.searchValue}')
     .then(function (response) {
       console.log(response);
     })
@@ -448,7 +448,7 @@
       console.log(error);
     });
   // url和参数分离，使用对象
-  axios.get('https://autumnfish.cn/search', {
+  axios.get('https://locally.uieee.com/search', {
     params: {
       keywords:${this.searchValue}
     }
@@ -542,7 +542,141 @@
       });
     ```
 
-    
+###### 	axiso适配器
+
+* axios默认为 XMLHttpRequest 适用于浏览器端; 但小程序端,由于没有DOM和BOM(微信小程序中是 wx.request),所以无法使用,需要手动修改
+
+* ```js
+  axios.defaults.adapter = function (config) {
+    //   console.log(config)
+    //  返回 Promise 对象; 以确保返回的数据,可以继续用 .then 或 async await的方法继续调用,从而避免回调地狱
+    return new Promise((resolve, reject) => {
+      mpvue.request({
+        url: config.url, // 开发者服务器接口地址
+        data: config.data, // 请求数据
+        method: config.method, // 请求方式
+        success: res => { // 成功之后的回调
+          resolve(res)
+        },
+        fail: err => { // 失败之后的回调
+          reject(err)
+        }
+      })
+    })
+  }
+  ```
+
+  
+
+###### 请求配置
+
+* 以下就是请求的配置选项，只有 url 选项是必须的，如果method选项未定义，那么它默认是以 GET 的方式发出请求
+
+```js
+{
+  //`url`是请求的服务器地址
+  url:'/user',
+  //`method`是请求资源的方式
+  method:'get'//default
+  //如果`url`不是绝对地址，那么`baseURL`将会加到`url`的前面
+  //当`url`是相对地址的时候，设置`baseURL`会非常的方便
+  baseURL:'https://some-domain.com/api/',
+  //`transformRequest`选项允许我们在请求发送到服务器之前对请求的数据做出一些改动
+  //该选项只适用于以下请求方式：`put/post/patch`
+  //数组里面的最后一个函数必须返回一个字符串、-一个`ArrayBuffer`或者`Stream`
+  transformRequest:[function(data){
+    //在这里根据自己的需求改变数据
+    return data;
+  }],
+  //`transformResponse`选项允许我们在数据传送到`then/catch`方法之前对数据进行改动
+  transformResponse:[function(data){
+    //在这里根据自己的需求改变数据
+    return data;
+  }],
+  //`headers`选项是需要被发送的自定义请求头信息
+  headers: {'X-Requested-With':'XMLHttpRequest'},
+  //`params`选项是要随请求一起发送的请求参数----一般链接在URL后面
+  //他的类型必须是一个纯对象或者是URLSearchParams对象
+  params: {
+    ID:12345
+  },
+  //`paramsSerializer`是一个可选的函数，起作用是让参数（params）序列化
+  //例如(https://www.npmjs.com/package/qs,http://api.jquery.com/jquery.param)
+  paramsSerializer: function(params){
+    return Qs.stringify(params,{arrayFormat:'brackets'})
+  },
+  //`data`选项是作为一个请求体而需要被发送的数据
+  //该选项只适用于方法：`put/post/patch`
+  //当没有设置`transformRequest`选项时dada必须是以下几种类型之一
+  //string/plain/object/ArrayBuffer/ArrayBufferView/URLSearchParams
+  //仅仅浏览器：FormData/File/Bold
+  //仅node:Stream
+  data {
+    firstName:"Fred"
+  },
+  //`timeout`选项定义了请求发出的延迟毫秒数
+  //如果请求花费的时间超过延迟的时间，那么请求会被终止
+
+  timeout:1000,
+  //`withCredentails`选项表明了是否是跨域请求
+  
+  withCredentials:false,//default
+  //`adapter`适配器选项允许自定义处理请求，这会使得测试变得方便
+  //返回一个promise,并提供验证返回
+  adapter: function(config){
+    /*..........*/
+  },
+  //`auth`表明HTTP基础的认证应该被使用，并提供证书
+  //这会设置一个authorization头（header）,并覆盖你在header设置的Authorization头信息
+  auth: {
+    username:"zhangsan",
+    password: "s00sdkf"
+  },
+  //返回数据的格式
+  //其可选项是arraybuffer,blob,document,json,text,stream
+  responseType:'json',//default
+  //
+  xsrfCookieName: 'XSRF-TOKEN',//default
+  xsrfHeaderName:'X-XSRF-TOKEN',//default
+  //`onUploadProgress`上传进度事件
+  onUploadProgress:function(progressEvent){
+    //下载进度的事件
+onDownloadProgress:function(progressEvent){
+}
+  },
+  //相应内容的最大值
+  maxContentLength:2000,
+  //`validateStatus`定义了是否根据http相应状态码，来resolve或者reject promise
+  //如果`validateStatus`返回true(或者设置为`null`或者`undefined`),那么promise的状态将会是resolved,否则其状态就是rejected
+  validateStatus:function(status){
+    return status >= 200 && status <300;//default
+  },
+  //`maxRedirects`定义了在nodejs中重定向的最大数量
+  maxRedirects: 5,//default
+  //`httpAgent/httpsAgent`定义了当发送http/https请求要用到的自定义代理
+  //keeyAlive在选项中没有被默认激活
+  httpAgent: new http.Agent({keeyAlive:true}),
+  httpsAgent: new https.Agent({keeyAlive:true}),
+  //proxy定义了主机名字和端口号，
+  //`auth`表明http基本认证应该与proxy代理链接，并提供证书
+  //这将会设置一个`Proxy-Authorization` header,并且会覆盖掉已经存在的`Proxy-Authorization`  header
+  proxy: {
+    host:'127.0.0.1',
+    port: 9000,
+    auth: {
+      username:'skda',
+      password:'radsd'
+    }
+  },
+  //`cancelToken`定义了一个用于取消请求的cancel token
+  //详见cancelation部分
+  cancelToken: new cancelToken(function(cancel){
+
+  })
+}
+```
+
+
 
 
 ##### 组件
@@ -696,6 +830,106 @@
 
 ###### 不同组件之间的传值  Vuex
 
+* Vuex 是一个专为 Vue.js 应用程序开发的**状态管理模式**。它采用集中式存储管理应用的所有组件的状态，并以相应的规则保证状态以一种可预测的方式发生变化 
+
+  * 我的理解: 集中式的数据管理,方便各个组件间的传递数据;谁要用就去仓库调用获取。但并不意味着所有数据放在Vuex里面,组件独有的还是放在组件内即可。
+
+* 安装:
+
+  * ```js
+    cnpm install vuex --save
+    ```
+
+* 导入 
+
+  ```js
+  import Vue from 'vue'
+  import Vuex from 'vuex'
+  // 必须use一下
+  Vue.use(Vuex)
+  ```
+
+* 实例化仓库
+
+  ```js
+  const store = new Vuex.Store({
+    state: {
+      count: 0
+    },
+    mutations: {
+      increment (state) {
+        state.count++
+      }
+    }
+  })
+  ```
+
+* 外面组件页面通过 store.state 来获取状态对象，以及通过  store.commit  方法触发状态变更：
+
+  ```js
+  store.commit('increment')
+  
+  console.log(store.state.count) // -> 1
+  ```
+
+```js
+import Vue from 'vue';  // 导入vue
+import Vuex from 'vuex'  // 导入Vuex
+
+Vue.use(Vuex)  // use 一下
+
+// 实例化store
+const store = new Vuex.Store({
+    state: {    // 数据  
+        goodsData: JSON.parse(window.localStorage.getItem('shoppingCar')) || {},// 商品数据 
+        isLogin: false,   // 是否登录
+    },
+    // 方法
+    mutations: {   //更改 Vuex 的 store 中的状态的唯一方法是提交 mutation
+        addToCar(state, goodsInfo) {    // 第一个参数为 state   第二参数为 提交载荷  
+            if (state.goodsData[goodsInfo.goodsId]) {  // 购物车已经存在
+                state.goodsData[goodsInfo.goodsId] += goodsInfo.goodsNum   // 累加
+            } else {
+                // Vue跟踪新增的属性    (坑点!!!)
+                Vue.set(state.goodsData, goodsInfo.goodsId, goodsInfo.goodsNum)
+            }
+        },
+        updateDate(state, sendData) {   // 更新数据
+            state.goodsData = sendData
+        },
+        changeLogin(state,isLogin){
+            state.isLogin = isLogin
+        }
+    },
+    // 计算属性  
+    getters: {  
+    // Vuex 允许我们在 store 中定义“getter”。就像计算属性一样，getter 的返回值会根据它的依赖被缓存起来，且只有当它的依赖值发生了改变才会被重新计算。
+        totalCount: state => {   // Getter 接受 state 作为其第一个参数：
+            let num = 0;    // 遍历 累加
+            for (let key in state.goodsData) {
+                num += state.goodsData[key]
+            }
+            return num    // 返回
+        }
+    }
+})
+
+// 页面关闭前 保存数据
+window.onbeforeunload = function () {
+    window.localStorage.setItem('shoppingCar', JSON.stringify(store.state.goodsData))
+}
+
+// 暴露出去
+export default store
+```
+
+* Mutations 与 Action 的异同:
+  * Mutations 专注于修改 state;理论上是修改state的唯一方法;必须是同步
+  * Action 通过 store.dispatch 方法触发可以是异步操作,但不能直接操作 state.内部还是通过 commit
+  * 只有mutation才能正真改变VUEX stroe中的state,
+
+
+
 ###### 获取组件(或元素) - refs
 
 * 说明: vm.$refs 一个对象,持有已注册过 ref 的所有子组件(或HTML元素)
@@ -728,8 +962,6 @@
   ```
 
   
-
-
 
 ##### 路由
 
@@ -941,7 +1173,21 @@
   * assets: 静态资源
   * public: 基础网页(index.html;  favicon,ico)
 
+###### scoped 属性
 
+* vue-cli 开发基于 webpack
+
+* 写的每一个单文件夹都包含: 结构, 逻辑, 样式;  最终会合并到一个文件夹
+
+* scc 作用域: scoped
+
+  * 添加到当前组件的 style 中; vue会为当前这个组件的元素增加一个随机的属性名; 选择器也会并上这个随机的属性;做到当前选择器只在这个组件内生效; 不会造成样式冲突.
+
+  * ```html
+    <style scoped>   </style>
+    ```
+
+    
 
 ##### 过滤器 filter
 
@@ -1123,4 +1369,5 @@ mounted ：完成挂载  可以获取DOM元素,进行DOM操作
     }
     ```
 
-###### 
+​                                                                                                                                                                                ----  彭 光
+
